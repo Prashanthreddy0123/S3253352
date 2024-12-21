@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "613695260545",
+    "project_id": "estore-c7148",
+    "storage_bucket": "estore-c7148.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:613695260545:android:04f62b7bdb50c51dc4ca80",
+        "android_client_info": {
+          "package_name": "uk.ac.tees.mad.estore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_2Sm-V6FMRq7mA39r4cv8C5ujDyfOAlU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
