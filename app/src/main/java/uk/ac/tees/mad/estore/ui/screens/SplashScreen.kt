@@ -27,7 +27,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import uk.ac.tees.mad.estore.Screen
 
 @Composable
@@ -41,9 +45,14 @@ fun SplashScreen(navController: NavHostController) {
     LaunchedEffect(key1 = true) {
         startAnimation = true
         delay(2500)
-        navController.navigate(Screen.Auth.route) {
-            popUpTo(Screen.Splash.route) { inclusive = true }
+        withContext(Dispatchers.Main) {
+            val route =
+                if (Firebase.auth.currentUser != null) Screen.Home.route else Screen.Auth.route
+            navController.navigate(route) {
+                popUpTo(Screen.Splash.route) { inclusive = true }
+            }
         }
+
     }
 
     Box(

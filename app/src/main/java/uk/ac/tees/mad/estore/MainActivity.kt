@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import uk.ac.tees.mad.estore.ui.screens.SplashScreen
 import uk.ac.tees.mad.estore.ui.screens.auth.AuthScreen
+import uk.ac.tees.mad.estore.ui.screens.home.HomeScreen
 import uk.ac.tees.mad.estore.ui.theme.EstoreTheme
 
 @AndroidEntryPoint
@@ -56,7 +57,7 @@ fun EstoreNavigation(
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) { SplashScreen(navController) }
         composable(Screen.Auth.route) { AuthScreen(navController) }
-        composable(Screen.Home.route) { }
+        composable(Screen.Home.route) { HomeScreen(navController) }
         composable(
             Screen.ProductDetails.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })

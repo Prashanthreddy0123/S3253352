@@ -10,6 +10,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import uk.ac.tees.mad.estore.data.ApiService
 import uk.ac.tees.mad.estore.repository.AuthRepository
 import uk.ac.tees.mad.estore.repository.AuthRepositoryImpl
+import uk.ac.tees.mad.estore.repository.ProductRepository
+import uk.ac.tees.mad.estore.repository.ProductRepositoryImpl
 import javax.inject.Singleton
 
 @Module
@@ -33,4 +35,9 @@ object AppModule {
             .build()
             .create(ApiService::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providesProductRepository(apiService: ApiService): ProductRepository =
+        ProductRepositoryImpl(apiService)
 }
