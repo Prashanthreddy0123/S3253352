@@ -52,7 +52,6 @@ fun SplashScreen(navController: NavHostController) {
                 popUpTo(Screen.Splash.route) { inclusive = true }
             }
         }
-
     }
 
     Box(
