@@ -22,7 +22,7 @@ class ProductDetailsViewModel @Inject constructor(
     private val favoriteDao: FavoriteDao,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val productId: Int = checkNotNull(savedStateHandle["productId"])
+    private val productId: String = checkNotNull(savedStateHandle["productId"])
 
     private val _uiState = MutableStateFlow(ProductDetailsUiState())
     val uiState = _uiState.asStateFlow()

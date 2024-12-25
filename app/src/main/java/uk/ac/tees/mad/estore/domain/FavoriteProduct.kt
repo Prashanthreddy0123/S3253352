@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "favorite_products")
 data class FavoriteProduct(
     @PrimaryKey
-    val id: Int,
+    val id: String,
     val title: String,
     val price: Double,
     val description: String,

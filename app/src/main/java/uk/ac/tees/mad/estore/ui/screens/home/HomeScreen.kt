@@ -186,7 +186,7 @@ private fun CategoryChips(
 @Composable
 private fun ProductGrid(
     products: List<Product>,
-    onProductClick: (Int) -> Unit,
+    onProductClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(

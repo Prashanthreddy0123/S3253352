@@ -1,7 +1,7 @@
 package uk.ac.tees.mad.estore.domain
 
 data class Product(
-    val id: Int,
+    val id: String,
     val title: String,
     val price: Double,
     val description: String,
