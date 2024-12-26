@@ -38,19 +38,15 @@ class ProductDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             try {
-                val products = productRepository.getAllProducts().getOrThrow()
-                val product = products.find { it.id == productId }
-                if (product != null) {
-                    _uiState.update {
-                        it.copy(
-                            product = product,
-                            isLoading = false,
-                            error = null
-                        )
-                    }
-                } else {
-                    throw Exception("Product not found")
+                val product = productRepository.getProduct(productId).getOrThrow()
+                _uiState.update {
+                    it.copy(
+                        product = product,
+                        isLoading = false,
+                        error = null
+                    )
                 }
+
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(

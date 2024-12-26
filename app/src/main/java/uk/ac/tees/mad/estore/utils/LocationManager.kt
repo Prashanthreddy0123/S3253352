@@ -2,6 +2,7 @@ package uk.ac.tees.mad.estore.utils
 
 import android.Manifest
 import android.app.Application
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
@@ -24,9 +25,8 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-@Singleton
 class LocationManager @Inject constructor(
-    private val application: Application
+    private val application: Context
 ) {
     private val fusedLocationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(application)

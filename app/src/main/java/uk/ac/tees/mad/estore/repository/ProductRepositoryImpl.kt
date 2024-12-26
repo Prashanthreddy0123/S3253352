@@ -27,4 +27,11 @@ class ProductRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+
+    override suspend fun getProduct(productId: String): Result<Product> =
+        try {
+            Result.success(apiService.getProduct(productId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
 }

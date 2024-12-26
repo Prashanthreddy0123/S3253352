@@ -1,5 +1,6 @@
 package uk.ac.tees.mad.estore.di
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
@@ -17,6 +18,7 @@ import uk.ac.tees.mad.estore.repository.AuthRepository
 import uk.ac.tees.mad.estore.repository.AuthRepositoryImpl
 import uk.ac.tees.mad.estore.repository.ProductRepository
 import uk.ac.tees.mad.estore.repository.ProductRepositoryImpl
+import uk.ac.tees.mad.estore.utils.LocationManager
 import javax.inject.Singleton
 
 @Module
@@ -61,4 +63,13 @@ object AppModule {
     fun provideFavoriteDao(database: AppDatabase): FavoriteDao {
         return database.favoriteDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideLocationManager(
+        @ApplicationContext application: Context
+    ): LocationManager {
+        return LocationManager(application)
+    }
+
 }
