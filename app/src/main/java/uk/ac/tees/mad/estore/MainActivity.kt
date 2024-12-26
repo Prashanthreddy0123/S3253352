@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import uk.ac.tees.mad.estore.ui.screens.SplashScreen
 import uk.ac.tees.mad.estore.ui.screens.auth.AuthScreen
+import uk.ac.tees.mad.estore.ui.screens.favorite.FavoritesScreen
 import uk.ac.tees.mad.estore.ui.screens.home.HomeScreen
 import uk.ac.tees.mad.estore.ui.screens.productdetail.ProductDetailsScreen
 import uk.ac.tees.mad.estore.ui.theme.EstoreTheme
@@ -62,12 +63,10 @@ fun EstoreNavigation(
         composable(
             Screen.ProductDetails.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            ProductDetailsScreen(navController = navController)
-        }
+        ) { ProductDetailsScreen(navController = navController) }
         composable(Screen.Cart.route) { }
         composable(Screen.Checkout.route) {}
         composable(Screen.Profile.route) { }
-        composable(Screen.Favorites.route) { }
+        composable(Screen.Favorites.route) { FavoritesScreen(navController) }
     }
 }

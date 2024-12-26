@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
@@ -60,7 +61,8 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             HomeTopBar(
-                onCartClick = { navController.navigate(Screen.Cart.route) }
+                onCartClick = { navController.navigate(Screen.Cart.route) },
+                onFavoriteClick = { navController.navigate(Screen.Favorites.route) }
             )
         }
     ) { padding ->
@@ -95,6 +97,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
                 uiState.error != null -> {
                     ErrorState(
                         error = uiState.error!!,
@@ -102,6 +105,7 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
+
                 else -> {
                     ProductGrid(
                         products = uiState.filteredProducts,
@@ -118,10 +122,13 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar(onCartClick: () -> Unit) {
+private fun HomeTopBar(onCartClick: () -> Unit, onFavoriteClick: () -> Unit) {
     TopAppBar(
         title = { Text("EStore") },
         actions = {
+            IconButton(onClick = onFavoriteClick) {
+                Icon(imageVector = Icons.Default.Favorite, contentDescription = "Favorite")
+            }
             IconButton(onClick = onCartClick) {
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
