@@ -147,7 +147,7 @@ private fun ProductDetails(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "$${product.price}",
+                text = "€${product.price}",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )

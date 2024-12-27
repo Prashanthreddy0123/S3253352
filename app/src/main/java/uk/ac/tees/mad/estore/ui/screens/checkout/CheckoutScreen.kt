@@ -147,7 +147,7 @@ fun CheckoutScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Subtotal")
-                        Text("$${uiState.product?.price}")
+                        Text("€${uiState.product?.price}")
                     }
 
                     Row(
@@ -155,7 +155,7 @@ fun CheckoutScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Delivery Fee")
-                        Text("$${uiState.deliveryFee}")
+                        Text("€${uiState.deliveryFee}")
                     }
 
                     HorizontalDivider()
@@ -169,7 +169,7 @@ fun CheckoutScreen(
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            "$${uiState.total}",
+                            "€${uiState.total}",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -180,7 +180,6 @@ fun CheckoutScreen(
             Button(
                 onClick = {
                     viewModel.placeOrder {
-                        // Show success message and navigate back
                         Toast.makeText(context, "Order placed successfully!", Toast.LENGTH_SHORT)
                             .show()
                         navController.navigateUp()

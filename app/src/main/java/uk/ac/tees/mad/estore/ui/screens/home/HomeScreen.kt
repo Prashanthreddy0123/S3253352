@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
@@ -30,6 +31,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -61,7 +63,8 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             HomeTopBar(
-                onFavoriteClick = { navController.navigate(Screen.Favorites.route) }
+                onFavoriteClick = { navController.navigate(Screen.Favorites.route) },
+                onProfileClick = { navController.navigate(Screen.Profile.route) }
             )
         }
     ) { padding ->
@@ -121,7 +124,7 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar(onFavoriteClick: () -> Unit) {
+private fun HomeTopBar(onFavoriteClick: () -> Unit, onProfileClick: () -> Unit) {
     TopAppBar(
         title = { Text("EStore") },
         actions = {
@@ -129,10 +132,16 @@ private fun HomeTopBar(onFavoriteClick: () -> Unit) {
                 Icon(imageVector = Icons.Default.Favorite, contentDescription = "Favorite")
             }
         },
+        navigationIcon = {
+            OutlinedIconButton(onClick = onProfileClick) {
+                Icon(imageVector = Icons.Default.Person, contentDescription = "Cart")
+            }
+        },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
-            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
 }
@@ -243,7 +252,7 @@ private fun ProductCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "$${product.price}",
+                        text = "€${product.price}",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
