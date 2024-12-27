@@ -45,7 +45,7 @@ class CheckoutViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                // Handle error
+                e.printStackTrace()
             }
         }
     }

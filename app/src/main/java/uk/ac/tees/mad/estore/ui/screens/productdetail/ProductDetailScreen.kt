@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import uk.ac.tees.mad.estore.Screen
 import uk.ac.tees.mad.estore.domain.Product
 import java.util.Locale
 
@@ -53,7 +54,7 @@ fun ProductDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {  },
+                title = { },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -96,6 +97,9 @@ fun ProductDetailsScreen(
             uiState.product != null -> {
                 ProductDetails(
                     product = uiState.product!!,
+                    onCheckout = {
+                        navController.navigate(Screen.Checkout.createRoute(uiState.product!!.id))
+                    },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
@@ -108,6 +112,7 @@ fun ProductDetailsScreen(
 @Composable
 private fun ProductDetails(
     product: Product,
+    onCheckout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -203,13 +208,13 @@ private fun ProductDetails(
 
             // Buy Button
             Button(
-                onClick = { /* Add to cart functionality */ },
+                onClick = onCheckout,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
                     .height(50.dp)
             ) {
-                Text("Add to Cart")
+                Text("Checkout")
             }
         }
     }

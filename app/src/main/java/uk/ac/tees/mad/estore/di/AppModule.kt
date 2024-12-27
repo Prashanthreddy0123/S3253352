@@ -1,6 +1,5 @@
 package uk.ac.tees.mad.estore.di
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth

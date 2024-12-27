@@ -61,7 +61,6 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             HomeTopBar(
-                onCartClick = { navController.navigate(Screen.Cart.route) },
                 onFavoriteClick = { navController.navigate(Screen.Favorites.route) }
             )
         }
@@ -122,18 +121,12 @@ fun HomeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTopBar(onCartClick: () -> Unit, onFavoriteClick: () -> Unit) {
+private fun HomeTopBar(onFavoriteClick: () -> Unit) {
     TopAppBar(
         title = { Text("EStore") },
         actions = {
             IconButton(onClick = onFavoriteClick) {
                 Icon(imageVector = Icons.Default.Favorite, contentDescription = "Favorite")
-            }
-            IconButton(onClick = onCartClick) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Cart"
-                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
