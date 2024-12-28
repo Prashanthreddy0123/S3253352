@@ -24,6 +24,7 @@ import uk.ac.tees.mad.estore.ui.screens.checkout.CheckoutScreen
 import uk.ac.tees.mad.estore.ui.screens.favorite.FavoritesScreen
 import uk.ac.tees.mad.estore.ui.screens.home.HomeScreen
 import uk.ac.tees.mad.estore.ui.screens.productdetail.ProductDetailsScreen
+import uk.ac.tees.mad.estore.ui.screens.profile.ProfileScreen
 import uk.ac.tees.mad.estore.ui.theme.EstoreTheme
 
 @AndroidEntryPoint
@@ -46,9 +47,11 @@ sealed class Screen(val route: String) {
     object ProductDetails : Screen("product_details/{productId}") {
         fun createRoute(productId: String) = "product_details/$productId"
     }
+
     object Checkout : Screen("checkout/{productId}") {
         fun createRoute(productId: String) = "checkout/$productId"
     }
+
     object Profile : Screen("profile")
     object Favorites : Screen("favorites")
 }
@@ -65,10 +68,11 @@ fun EstoreNavigation(
             Screen.ProductDetails.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) { ProductDetailsScreen(navController = navController) }
-        composable(Screen.Checkout.route,
+        composable(
+            Screen.Checkout.route,
             arguments = listOf(navArgument("productId") { type = NavType.StringType })
         ) { CheckoutScreen(navController) }
-        composable(Screen.Profile.route) { }
+        composable(Screen.Profile.route) { ProfileScreen(navController) }
         composable(Screen.Favorites.route) { FavoritesScreen(navController) }
     }
 }
