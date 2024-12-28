@@ -1,6 +1,10 @@
 package uk.ac.tees.mad.estore.ui.screens.profile
 
+import android.content.Context
 import android.net.Uri
+import android.os.Environment
+import androidx.activity.result.ActivityResultLauncher
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -74,6 +79,88 @@ class ProfileViewModel @Inject constructor(
 
     fun updateField(value: ProfileUiState) {
         _uiState.update { value }
+    }
+
+    fun saveChanges() {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+
+                val user = auth.currentUser ?: throw Exception("User not found")
+
+                // Upload new profile picture if changed
+                tempImageUri?.let { uri ->
+                    storage.reference
+                        .child("profile_pictures/${user.uid}")
+                        .putFile(uri)
+                        .await()
+                }
+
+                // Update user data in Firestore
+                val userData: HashMap<String, Any> = hashMapOf(
+                    "name" to uiState.value.name,
+                    "phone" to uiState.value.phone,
+                    "address" to uiState.value.address
+                )
+
+                firestore.collection("users")
+                    .document(user.uid)
+                    .update(userData)
+                    .await()
+
+                _uiState.update {
+                    it.copy(
+                        isEditing = false,
+                        isLoading = false
+                    )
+                }
+
+                loadUserProfile() // Refreshing profile data
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        error = e.message ?: "Failed to save changes",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun updateProfilePicture(uri: Uri) {
+        tempImageUri = uri
+        _uiState.update { it.copy(profilePictureUri = uri) }
+    }
+
+    fun launchCamera(context: Context, launcher: ActivityResultLauncher<Uri>) {
+        val imageUri = createImageUri(context)
+        tempImageUri = imageUri
+        launcher.launch(imageUri)
+    }
+
+    fun refreshProfilePicture() {
+        _uiState.update { it.copy(profilePictureUri = tempImageUri) }
+    }
+
+    private fun createImageUri(context: Context): Uri {
+        val imageFile = File(
+            context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+            "profile_picture_${System.currentTimeMillis()}.jpg"
+        )
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            imageFile
+        )
+    }
+
+    fun signOut() {
+        auth.signOut()
+        // Navigate to login screen (should be handled by auth state observer in main activity)
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }
 
