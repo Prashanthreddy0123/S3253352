@@ -1,6 +1,9 @@
 package uk.ac.tees.mad.estore.ui.screens.profile
 
+import android.Manifest
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import uk.ac.tees.mad.estore.Screen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,7 +64,27 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { viewModel.updateProfilePicture(it) }
+    }
 
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            viewModel.refreshProfilePicture()
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            viewModel.launchCamera(context, cameraLauncher)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -67,11 +96,15 @@ fun ProfileScreen(
                     }
                 },
                 actions = {
-
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    if (uiState.isEditing) {
+                        IconButton(onClick = { viewModel.saveChanges() }) {
+                            Icon(Icons.Default.Save, contentDescription = "Save")
+                        }
+                    } else {
+                        IconButton(onClick = { viewModel.startEditing() }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        }
                     }
-
                 }
             )
         }
@@ -97,21 +130,22 @@ fun ProfileScreen(
                     imageUri = uiState.profilePictureUri,
                     isEditing = uiState.isEditing,
                     onCameraClick = {
-
+                        permissionLauncher.launch(Manifest.permission.CAMERA)
                     },
                     onGalleryClick = {
-
+                        photoPickerLauncher.launch("image/*")
                     }
                 )
 
                 ProfileDetailsSection(
                     uiState = uiState,
-                    onValueChange = viewModel::updateField
+                    onValueChange = viewModel::updateField,
+                    getLocation = { viewModel.getCurrentLocation(context) }
                 )
 
                 if (uiState.isEditing) {
                     Button(
-                        onClick = { },
+                        onClick = { viewModel.saveChanges() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -121,7 +155,12 @@ fun ProfileScreen(
                 }
 
                 Button(
-                    onClick = { },
+                    onClick = {
+                        viewModel.signOut()
+                        navController.navigate("login") {
+                            popUpTo(Screen.Profile.route) { inclusive = true }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -133,6 +172,20 @@ fun ProfileScreen(
                 }
             }
         }
+    }
+
+    // Show error dialog if there's an error
+    if (uiState.error != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearError() },
+            title = { Text("Error") },
+            text = { Text(uiState.error!!) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearError() }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
@@ -206,7 +259,8 @@ fun ProfileImageSection(
 @Composable
 fun ProfileDetailsSection(
     uiState: ProfileUiState,
-    onValueChange: (ProfileUiState) -> Unit
+    onValueChange: (ProfileUiState) -> Unit,
+    getLocation: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -244,6 +298,18 @@ fun ProfileDetailsSection(
             onValueChange = { onValueChange(uiState.copy(address = it)) },
             label = { Text("Address") },
             modifier = Modifier.fillMaxWidth(),
+            trailingIcon = {
+                if (uiState.isLoadingLocation) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    IconButton(onClick = getLocation, enabled = uiState.isEditing) {
+                        Icon(Icons.Default.LocationOn, contentDescription = "Location")
+                    }
+                }
+            },
             enabled = uiState.isEditing,
             maxLines = 3
         )

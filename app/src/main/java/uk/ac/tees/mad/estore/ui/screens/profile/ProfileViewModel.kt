@@ -3,6 +3,7 @@ package uk.ac.tees.mad.estore.ui.screens.profile
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import uk.ac.tees.mad.estore.utils.LocationManager
+import uk.ac.tees.mad.estore.utils.LocationUtils
 import java.io.File
 import javax.inject.Inject
 
@@ -23,7 +26,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val locationManager: LocationManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
@@ -47,22 +51,18 @@ class ProfileViewModel @Inject constructor(
                     .get()
                     .await()
 
-                val profileData = userData.toObject(UserProfile::class.java)
+                val profileData = userData.data
                     ?: throw Exception("Profile data not found")
 
-                // Load profile picture if exists
-                val profilePictureUrl = storage.reference
-                    .child("profile_pictures/${user.uid}")
-                    .downloadUrl
-                    .await()
+                val pp = profileData["profilePicture"] as? String
 
                 _uiState.update {
                     it.copy(
-                        name = profileData.name,
+                        name = profileData["name"] as? String ?: "",
                         email = user.email ?: "",
-                        phone = profileData.phone,
-                        address = profileData.address,
-                        profilePictureUri = profilePictureUrl,
+                        phone = profileData["phone"] as? String ?: "",
+                        address = profileData["address"] as? String ?: "",
+                        profilePictureUri = pp?.let { Uri.parse(it) },
                         isLoading = false
                     )
                 }
@@ -77,6 +77,10 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    fun startEditing() {
+        _uiState.update { it.copy(isEditing = true) }
+    }
+
     fun updateField(value: ProfileUiState) {
         _uiState.update { value }
     }
@@ -88,20 +92,19 @@ class ProfileViewModel @Inject constructor(
 
                 val user = auth.currentUser ?: throw Exception("User not found")
 
-                // Upload new profile picture if changed
-                tempImageUri?.let { uri ->
-                    storage.reference
-                        .child("profile_pictures/${user.uid}")
-                        .putFile(uri)
-                        .await()
-                }
-
-                // Update user data in Firestore
                 val userData: HashMap<String, Any> = hashMapOf(
                     "name" to uiState.value.name,
                     "phone" to uiState.value.phone,
                     "address" to uiState.value.address
                 )
+                tempImageUri?.let { uri ->
+                    val task = storage.reference
+                        .child("profile_pictures/${user.uid}")
+                        .putFile(uri)
+                        .await()
+                    userData["profilePicture"] = task.storage.downloadUrl.await()
+                }
+
 
                 firestore.collection("users")
                     .document(user.uid)
@@ -154,9 +157,48 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
+    fun getCurrentLocation(context: Context) {
+        if (locationManager.checkLocationPermission()) {
+            viewModelScope.launch {
+                try {
+                    _uiState.update { it.copy(isLoadingLocation = true) }
+
+                    // Get the location
+                    val location = locationManager.getCurrentLocation()
+
+                    // Convert location to address
+                    val address = locationManager.getAddressFromLocation(location)
+
+                    // Format the address
+                    val formattedAddress = locationManager.formatAddress(address)
+
+                    _uiState.update {
+                        it.copy(
+                            address = formattedAddress,
+                            isLoadingLocation = false
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.update {
+                        it.copy(
+                            error = e.message ?: "Error getting location",
+                            isLoadingLocation = false
+                        )
+                    }
+                }
+            }
+        } else {
+            // Request location permission if not granted
+            if (context is ComponentActivity) {
+                LocationUtils.requestLocationPermission(context)
+            }
+        }
+
+
+    }
+
     fun signOut() {
         auth.signOut()
-        // Navigate to login screen (should be handled by auth state observer in main activity)
     }
 
     fun clearError() {
@@ -173,6 +215,7 @@ data class ProfileUiState(
     val profilePictureUri: Uri? = null,
     val isEditing: Boolean = false,
     val isLoading: Boolean = false,
+    val isLoadingLocation: Boolean = false,
     val error: String? = null
 )
 
@@ -183,5 +226,6 @@ enum class ProfileField {
 data class UserProfile(
     val name: String = "",
     val phone: String = "",
-    val address: String = ""
+    val address: String = "",
+    val profilePicture: String = ""
 )
